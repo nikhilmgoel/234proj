@@ -3,13 +3,17 @@
 from utils import *
 import pickle
 import sys
+import os
 import numpy as np
 
 NUM_SCENES = 5
 classes = ["Pedestrian", "Biker", "Skater", "Cart"]
 
 def save_processed_scene(scene, s):
-	pickle.dump(scene, open('train_data/pooling/scene' + str(s) + '/scene.pickle', 'wb'))
+	path = 'train_data/pooling/scene' + str(s)
+	if not os.path.exists(path):
+		os.makedirs(path)
+	pickle.dump(scene, open(path + '/scene.pickle', 'wb'))
 
 def load_processed_scene(s):
 	return pickle.load(open('train_data/pooling/scene' + str(s) + '/scene.pickle', 'rb'))
@@ -70,11 +74,12 @@ for s in range(NUM_SCENES):
 	for frame in frames:
 		outlay_dict[frame], path_dict[frame] = {}, {}
 		for obj in scene[frame]:
-			outlay_dict[frame][obj[0]] = obj[1]
-			class_dict[obj[0]] = obj[2]
+			outlay_dict[frame][obj[0]] = obj[1] # in a frame, set {member-id: positions} of all objects
+			class_dict[obj[0]] = obj[2] # frame doesn't matter. set {member-id: classification} for all objects in the scene
 
+			# initial frame
 			if frame == 0:
-				path_dict[frame][obj[0]] = [obj[1]]
+				path_dict[frame][obj[0]] = [obj[1]] # set {member-id: position} for all objects in the first frame
 				continue
 
 			prev_frame = frames[frames.index(frame) - 1]
@@ -85,6 +90,7 @@ for s in range(NUM_SCENES):
 
 	save_processed_scene([outlay_dict, class_dict, path_dict], s)
 
+'''
 	#constructing a simpler dataset for naive training
 	def extract_naive_dataset(s, c):
 		frames = s.keys()
@@ -109,3 +115,4 @@ for s in range(NUM_SCENES):
 	for c in classes:
 		X, y = extract_naive_dataset(scene, c)
 		save_training_set(X, y, s, c)
+'''
