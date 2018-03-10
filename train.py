@@ -91,7 +91,7 @@ class PG(object):
             logger: logger instance from logging module
 
     You do not need to implement anything in this function. However,
-    you will need to use self.discrete, self.observation_dim,
+    you will need to use self.observation_dim,
     self.action_dim, and self.lr in other methods.
     
     """
@@ -123,26 +123,14 @@ class PG(object):
   
     TODO: add placeholders:
     self.observation_placeholder, type = tf.float32
-    self.action_placeholder, type depends on the self.discrete
+    self.action_placeholder, type = tf.float32
     self.advantage_placeholder, type = tf.float32
   
-    HINT: In the case of a continuous action space, an action will be specified 
-    by self.action_dim float32 numbers.  
     """
-    #######################################################
-    #########   YOUR CODE HERE - 8-12 lines.   ############
 
     self.observation_placeholder = tf.placeholder(tf.float32, shape = (None, self.observation_dim))
-
-    if self.discrete:
-      self.action_placeholder = tf.placeholder(tf.int64, shape = (None,))
-    else:
-      self.action_placeholder = tf.placeholder(tf.float32, shape = (None, self.action_dim))
-
+    self.action_placeholder = tf.placeholder(tf.float32, shape = (None, self.action_dim))
     self.advantage_placeholder = tf.placeholder(tf.float32, shape = (None,))
-
-    #######################################################
-    #########          END YOUR CODE.          ############
   
   
   def build_policy_network_op(self, scope = "policy_network"):
@@ -150,19 +138,7 @@ class PG(object):
     Build the policy network, construct the tensorflow operation to sample 
     actions from the policy network outputs, and compute the log probabilities
     of the taken actions (for computing the loss later). These operations are 
-    stored in self.sampled_action and self.logprob. Must handle both settings
-    of self.discrete.
-
-    TODO:
-    Discrete case:
-        logits: the logits for each action
-            HINT: use build_mlp
-        self.sampled_action: sample from these logits
-            HINT: use tf.multinomial + tf.squeeze
-        self.logprob: compute the log probabilities of the taken actions
-            HINT: 1. tf.nn.sparse_softmax_cross_entropy_with_logits computes 
-                     the *negative* log probabilities of labels, given logits.
-                  2. taken actions are different than sampled actions!
+    stored in self.sampled_action and self.logprob.
 
     Continuous case:
         To build a policy in a continuous action space domain, we will have the
@@ -185,8 +161,6 @@ class PG(object):
             HINT: use tf.contrib.distributions.MultivariateNormalDiag
 
     """
-    #######################################################
-    #########   YOUR CODE HERE - 5-10 lines.   ############
 
     out = build_mlp(
       self.observation_placeholder, 
@@ -195,20 +169,11 @@ class PG(object):
       n_layers=self.config.n_layers,
       size=self.config.layer_size)
 
-    if self.discrete:
-      action_logits = out
-      self.sampled_action = tf.squeeze(tf.multinomial(action_logits, 1), axis = 1) 
-      self.logprob = -tf.nn.sparse_softmax_cross_entropy_with_logits(logits = action_logits, 
-        labels = self.action_placeholder)
-    else:
-      action_means = out
-      log_std = tf.get_variable("log_std", shape = (self.action_dim))
-      mvn = tf.contrib.distributions.MultivariateNormalDiag(action_means, log_std)
-      self.sampled_action = tf.squeeze(mvn.sample(sample_shape=(self.action_dim)), axis = 2)
-      self.logprob = mvn.log_prob(self.sampled_action)
-
-    #######################################################
-    #########          END YOUR CODE.          ############
+    action_means = out
+    log_std = tf.get_variable("log_std", shape = (self.action_dim))
+    mvn = tf.contrib.distributions.MultivariateNormalDiag(action_means, log_std)
+    self.sampled_action = tf.squeeze(mvn.sample(sample_shape=(self.action_dim)), axis = 2)
+    self.logprob = mvn.log_prob(self.sampled_action)
 
   
   def add_loss_op(self):
@@ -227,14 +192,7 @@ class PG(object):
 
     """
 
-    ######################################################
-    #########   YOUR CODE HERE - 1-2 lines.   ############
-
-    # possibly reduce_mean here
-    self.loss = -tf.reduce_sum(tf.multiply(self.logprob, self.advantage_placeholder))
-
-    #######################################################
-    #########          END YOUR CODE.          ############
+    self.loss = -tf.reduce_sum(tf.multiply(self.logprob, self.advantage_placeholder)) # nikhil - possibly reduce_mean here
   
   
   def add_optimizer_op(self):
@@ -243,15 +201,10 @@ class PG(object):
     TODO: Set self.train_op
     HINT: Use self.lr, and minimize self.loss
     """
-    ######################################################
-    #########   YOUR CODE HERE - 1-2 lines.   ############
 
     opt = tf.train.AdamOptimizer(learning_rate = self.lr)
     self.train_op = opt.minimize(self.loss)
 
-    #######################################################
-    #########          END YOUR CODE.          ############
-  
   
   def add_baseline_op(self, scope = "baseline"):
     """
@@ -273,8 +226,6 @@ class PG(object):
         HINT: first construct a loss. Use tf.losses.mean_squared_error.
 
     """
-    ######################################################
-    #########   YOUR CODE HERE - 4-8 lines.   ############
 
     self.baseline = tf.squeeze(build_mlp(
       self.observation_placeholder, 
@@ -288,8 +239,6 @@ class PG(object):
     opt = tf.train.AdamOptimizer(learning_rate = self.lr)
     self.update_baseline_op = opt.minimize(tf.losses.mean_squared_error(self.baseline_target_placeholder, self.baseline))
 
-    #######################################################
-    #########          END YOUR CODE.          ############
   
   def build(self):
     """
@@ -302,11 +251,11 @@ class PG(object):
     # add placeholders
     self.add_placeholders_op()
     # create policy net
-    self.build_policy_network_op()
+    #self.build_policy_network_op()
     # add square loss
-    self.add_loss_op()
+    #self.add_loss_op()
     # add optmizer for the main networks
-    self.add_optimizer_op()
+    #self.add_optimizer_op()
   
     if self.config.use_baseline:
       self.add_baseline_op()
@@ -429,7 +378,7 @@ class PG(object):
   
       for step in range(self.config.max_ep_len):
         states.append(state)
-        action = self.sess.run(self.sampled_action, feed_dict={self.observation_placeholder : states[-1][None]})[0]
+        action = np.array([0,0])#self.sess.run(self.sampled_action, feed_dict={self.observation_placeholder : states[-1][None]})[0]
         state, reward, done, info = env.step(action)
         actions.append(action)
         rewards.append(reward)

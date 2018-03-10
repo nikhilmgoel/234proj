@@ -13,23 +13,23 @@ class NavigateEnv(gym.Env):
 
   def __init__(self):
     self.tau = 0.02  # seconds between state updates
-    self.min_position = [-1.2, -1.2]
-    self.max_position = [0.0, 0.0]
-    self.goal_position = [1.0, 1.0]
+    self.min_position = np.array([-1.2, -1.2])
+    self.max_position = np.array([0.0, 0.0])
+    self.goal_position = np.array([1.0, 1.0])
     self.max_speed = 0.07
     self.min_step = 0
     self.max_step = 2.0
 
-    self.low_state = np.array([(self.min_x_position, self.min_y_position), -self.max_speed])
-    self.high_state = np.array([(self.max_position, self.max_y_position), self.max_speed])
+    self.low_state = np.array([(self.min_position[0], self.min_position[1]), -self.max_speed])
+    self.high_state = np.array([(self.max_position[0], self.max_position[1]), self.max_speed])
 
     self.action_space = spaces.Box(
-  		low=np.array(-self.max_step, -self.max_step), 
-  		high=np.array(self.max_step, self.max_step))
+  		low=np.array([-self.max_step, -self.max_step]), 
+  		high=np.array([self.max_step, self.max_step]))
 
     self.observation_space = spaces.Box(
-    	low=np.array(self.min_position[0], self.min_position[1]),
-    	high=np.array(self.max_position[0], self.max_position[1]))
+    	low=np.array([self.min_position[0], self.min_position[1]]),
+    	high=np.array([self.max_position[0], self.max_position[1]]))
 
     self.viewer = None
     self.state = None
@@ -50,7 +50,7 @@ class NavigateEnv(gym.Env):
 
     if (velocity > self.max_speed): velocity = self.max_speed
     if (velocity < -self.max_speed): velocity = -self.max_speed
-    position += velocity
+    position = (position[0] + velocity, position[1] + velocity) # TODO 
     if (position[0] > self.max_position[0]): position[0] = self.max_position[0]
     if (position[1] > self.max_position[1]): position[1] = self.max_position[1]
     if (position[0] < self.min_position[0]): position[0] = self.min_position[0]
@@ -63,6 +63,7 @@ class NavigateEnv(gym.Env):
 # nikhil - another possible reward model to try: reward increases inversely proportional to gap between agent and goal
     # calculate reward
     reward = 0
+    prev_distance_to_goal = 0 # TODO
     distance_to_goal = np.linalg.norm(position-self.goal_position)
     if (distance_to_goal > prev_distance_to_goal):
       reward = -1.0
@@ -80,17 +81,18 @@ class NavigateEnv(gym.Env):
     return self.state, reward, done, {}
 
   def reset(self):
-    self.state = np.array([self.np_random.uniform(low=-0.6, high=-0.4), 0]) #TODO (define starting range)
+    #TODO (define starting range)
+    self.state = np.array([(self.np_random.uniform(low=-0.6, high=-0.4), self.np_random.uniform(low=-0.6, high=-0.4)), 0])
     return np.array(self.state)
 
-  def _height(self, xs):
+  def _height(self, xs): #TODO
     return np.sin(3 * xs)*.45+.55
 
   def render(self, mode='human'):
     screen_width = 600
     screen_height = 400
 
-    world_width = self.max_position - self.min_position
+    world_width = 200#self.max_position - self.min_position # TODO
     scale = screen_width / world_width
     bot_width = 40
     bot_height = 20
@@ -98,9 +100,9 @@ class NavigateEnv(gym.Env):
 
     if self.viewer is None:
       self.viewer = rendering.Viewer(screen_width, screen_height)
-      xs = np.linspace(self.min_position, self.max_position, 100)
+      xs = np.linspace(self.min_position[0], self.max_position[1], 100)
       ys = self._height(xs)
-      xys = list(zip((xs-self.min_position)*scale, ys*scale))
+      xys = list(zip((xs-self.min_position[0])*scale, ys*scale))
 
       self.track = rendering.make_polyline(xys)
       self.track.set_linewidth(4)
@@ -113,12 +115,12 @@ class NavigateEnv(gym.Env):
       bot = rendering.FilledPolygon([(l,b), (l,t), (r,t), (r,b)])
       bot.add_attr(rendering.Transform(translation=(0, clearance)))
       self.bot_trans = rendering.Transform()
-      bot.add_attr(self.cartrans)
+      bot.add_attr(self.bot_trans)
       self.viewer.add_geom(bot)
       
-      # GOOOOOOAAAAAAAALLLLLLL
-      flagx = (self.goal_position-self.min_position)*scale
-      flagy1 = self._height(self.goal_position)*scale
+      # GOOOOOOAAAAAAAALLLLLLL #TODO
+      flagx = np.linalg.norm(self.goal_position - self.min_position)*scale 
+      flagy1 = self._height(self.goal_position[1])*scale
       flagy2 = flagy1 + 50
       flagpole = rendering.Line((flagx, flagy1), (flagx, flagy2))
       self.viewer.add_geom(flagpole)
@@ -127,8 +129,8 @@ class NavigateEnv(gym.Env):
       self.viewer.add_geom(flag)
 
       pos = self.state[0]
-      self.bot_trans.set_translation((pos-self.min_position)*scale, self._height(pos)*scale)
-      self.bot_trans.set_rotation(math.cos(3 * pos))
+      self.bot_trans.set_translation((np.linalg.norm(pos-self.min_position[0]))*scale, self._height(pos[0])*scale) #TODO
+      self.bot_trans.set_rotation(math.cos(3 * pos[0])) #TODO
 
       return self.viewer.render(return_rgb_array = mode == 'rgb_array')
 

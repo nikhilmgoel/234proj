@@ -1,6 +1,7 @@
 """ Creates and compresses datasets from annotations
 """
-from utils import *import pickle
+from utils import *
+import pickle
 import sys
 import numpy as np
 
@@ -59,8 +60,10 @@ for s in range(NUM_SCENES):
 		else:
 			scene[frame] = [info]
 
-	#spearate parsed info into the three dictionaries (reduces complexity while training)
-	#outlay_dict contains position per frame. class_dict contains classification per member-id. path_dict contains path thus far per member-id
+	# separate parsed info into the three dictionaries (reduces complexity while training)
+	# outlay_dict: position per frame. 
+	# class_dict: classification per member-id.
+	# path_dict: path thus far per member-id
 	outlay_dict, class_dict, path_dict = {}, {}, {}
 	frames = scene.keys()
 	frames = sorted(frames)
@@ -106,6 +109,3 @@ for s in range(NUM_SCENES):
 	for c in classes:
 		X, y = extract_naive_dataset(scene, c)
 		save_training_set(X, y, s, c)
-
-
-
