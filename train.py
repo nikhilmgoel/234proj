@@ -106,11 +106,10 @@ class PG(object):
       self.logger = get_logger(config.log_path)
     self.env = env
   
-    # discrete action space or continuous action space
-    self.discrete = isinstance(env.action_space, gym.spaces.Discrete)
+    # continuous action space
     self.observation_dim = self.env.observation_space.shape[0]
-    self.action_dim = self.env.action_space.n if self.discrete else self.env.action_space.shape[0]
-  
+    self.action_dim = self.env.action_space.shape[0]
+
     self.lr = self.config.learning_rate
   
     # build model

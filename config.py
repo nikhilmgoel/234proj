@@ -7,17 +7,18 @@ class config():
     record = True
     
     # model and training config
-    num_batches = 1000 # number of batches trained on 
-    batch_size = 20000 # number of steps used to compute each policy update
-    max_ep_len = 1000 # maximum episode length
-    learning_rate = 3e-2
-    gamma              = 0.1 # the discount factor
-    use_baseline = True 
-    normalize_advantage=True 
+    num_batches         = 1000 # number of batches trained on 
+    batch_size          = 20000 # number of steps used to compute each policy update
+    max_ep_len          = 1000 # maximum episode length
+    learning_rate       = 3e-2
+    gamma               = 0.1 # the discount factor
+    use_baseline        = True 
+    normalize_advantage = True
+
     # parameters for the policy and baseline models
-    n_layers = 2 
-    layer_size = 32 
-    activation=tf.nn.relu 
+    n_layers            = 2 
+    layer_size          = 32 
+    activation          =tf.nn.relu 
 
     # output config
     output_path  = "results/" + env_name + "/"
