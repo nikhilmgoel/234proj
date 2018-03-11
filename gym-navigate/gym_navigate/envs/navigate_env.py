@@ -51,6 +51,7 @@ class NavigateEnv(gym.Env):
     return [seed]
 
 
+  # each step is how many frames? 1? 3?
   def step(self, action):
     assert self.action_space.contains(action), "%r (%s) invalid" % (action, type(action))
 
