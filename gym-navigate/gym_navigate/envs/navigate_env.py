@@ -14,18 +14,23 @@ class NavigateEnv(gym.Env):
   def __init__(self):
 
     # Bot dynamics
-    self.tau = 0.02 # seconds between state updates
-    self.min_position = np.array([-1.2, -1.2])
-    self.max_position = np.array([0.0, 0.0])
-    self.goal_position = np.array([1.0, 1.0])
-    self.max_speed = 0.07
+    self.min_position = np.array([0, 0])
+    self.max_position = np.array([1948, 1630])
+    self.goal_position = np.array([0, 1066])
+    self.start_position = np.array([1630, 1066])
     self.min_step = 0
     self.max_step = 2.0
+    self.frames_per_step = 8
+    self.distance_to_goal = 0.0
+    self.prev_distance_to_goal = 0.0
+
+    # If below -1 reward for n steps in a row, terminate game
+    self.fault = [0,5] # [current count, n]
 
     # Viewer
-    self.screen_width = 1000
-    self.screen_height = 700
-    self.world_width = self.max_position[0] - self.min_position[1]
+    self.screen_width = 700
+    self.screen_height = 1000
+    self.world_width = self.max_position[0] - self.min_position[0]
     self.scale = self.screen_width / self.world_width
     self.grid_boxes = 100
     self.bot_width = 40
@@ -42,30 +47,19 @@ class NavigateEnv(gym.Env):
     self.viewer = None
     self.state = None
 
-    self.seed()
     self.reset()
 
 
-  def seed(self, seed=None):
-    self.np_random, seed = seeding.np_random(seed)
-    return [seed]
-
-
-  # each step is how many frames? 1? 3?
   def step(self, action):
     assert self.action_space.contains(action), "%r (%s) invalid" % (action, type(action))
 
-    position = self.state[0]
-    velocity = self.state[1]
+    position = self.state
+    position = (position[0] + action[0], position[1] + action[1])
 
-    if (velocity > self.max_speed): velocity = self.max_speed
-    if (velocity < -self.max_speed): velocity = -self.max_speed
-    position = (position[0] + velocity, position[1] + velocity) # TODO 
     if (position[0] > self.max_position[0]): position[0] = self.max_position[0]
     if (position[1] > self.max_position[1]): position[1] = self.max_position[1]
     if (position[0] < self.min_position[0]): position[0] = self.min_position[0]
     if (position[1] < self.min_position[1]): position[1] = self.min_position[1]
-    if (position[0] == self.min_position[0] and position[1] == self.min_position[1] and velocity < 0): velocity = 0
 
     done = bool(position[0] >= self.goal_position[0] and position[1] >= self.goal_position[1])
 
@@ -73,11 +67,14 @@ class NavigateEnv(gym.Env):
     # nikhil - another possible reward model to try: reward increases inversely proportional to gap between agent and goal
     # calculate reward
     reward = 0
-    prev_distance_to_goal = 0 # TODO
-    distance_to_goal = np.linalg.norm(position-self.goal_position)
-    if (distance_to_goal > prev_distance_to_goal):
+    self.distance_to_goal = np.linalg.norm(position - self.goal_position)
+
+    # if (self.fault[0] >= self.fault[1]):
+    #   # end game
+    if (self.distance_to_goal > self.prev_distance_to_goal):
       reward = -1.0
-    elif (distance_to_goal == prev_distance_to_goal):
+      self.fault[0]++
+    elif (self.distance_to_goal == self.prev_distance_to_goal):
       reward = 0.0
     else:
       reward = 1.0
@@ -88,13 +85,12 @@ class NavigateEnv(gym.Env):
         #reward = 1.0
     #reward-= math.pow(action[0],2)*0.1
 
-    self.state = np.array([position, velocity])
+    self.state = position
     return self.state, reward, done, {}
 
 
   def reset(self):
-    #TODO (define starting range)
-    self.state = np.array([(self.min_position[0],self.min_position[1]),0])#np.array([(self.np_random.uniform(low=-0.6, high=-0.4), self.np_random.uniform(low=-0.6, high=-0.4)), 0])
+    self.state = self.start_position
     return np.array(self.state)
 
 
@@ -121,7 +117,7 @@ class NavigateEnv(gym.Env):
       clearance = 10
 
       # bot
-      l,r,t,b = -self.bot_width/2, self.bot_width/2, self.bot_height, 0
+      l,r,t,b = -self.bot_width / 2, self.bot_width / 2, self.bot_height, 0
       bot = rendering.FilledPolygon([(l,b), (l,t), (r,t), (r,b)])
       bot.add_attr(rendering.Transform(translation=(0, clearance)))
       self.bot_trans = rendering.Transform()
