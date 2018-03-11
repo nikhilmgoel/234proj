@@ -15,9 +15,9 @@ class NavigateEnv(gym.Env):
 
     # Bot dynamics
     self.min_position = np.array([0, 0])
-    self.max_position = np.array([1630, 1948])
-    self.goal_position = np.array([0, 1066])
-    self.start_position = np.array([1630, 1066])
+    self.max_position = np.array([1630 / 5, 1948 / 5])
+    self.goal_position = np.array([0, 1066 / 5])
+    self.start_position = np.array([1630 / 5, 1066 / 5])
     self.min_step = 0
     self.max_step = 2.0
     self.frames_per_step = 4
@@ -25,13 +25,11 @@ class NavigateEnv(gym.Env):
     self.prev_distance_to_goal = 0.0
 
     # If below -1 reward for n steps in a row, terminate game
-    self.fault = [0,5] # [current count, n]
+    self.fault = [0,5] # ---> [current count, n]
 
     # Viewer
-    self.screen_width = 500
+    self.screen_width = 700
     self.screen_height = 700
-    self.world_width = 2000
-    #self.scale = self.screen_width / self.world_width
     self.grid_boxes = 100
     self.bot_width = 40
     self.bot_height = 20
@@ -59,34 +57,33 @@ class NavigateEnv(gym.Env):
     position = self.state
     position = (position[0] + action[0], position[1] + action[1])
 
-    if (position[0] > self.max_position[0]): position[0] = self.max_position[0]
-    if (position[1] > self.max_position[1]): position[1] = self.max_position[1]
-    if (position[0] < self.min_position[0]): position[0] = self.min_position[0]
-    if (position[1] < self.min_position[1]): position[1] = self.min_position[1]
+    if (position[0] > self.max_position[0]): position = (self.max_position[0], position[1])
+    if (position[1] > self.max_position[1]): position = (position[0], self.max_position[1])
+    if (position[0] < self.min_position[0]): position = (self.min_position[0], position[1])
+    if (position[1] < self.min_position[1]): position = (position[0, self.min_position[1]])
 
-    done = bool(position[0] >= self.goal_position[0] and position[1] >= self.goal_position[1])
+    done = bool((position[0] == self.goal_position[0] 
+      and position[1] == self.goal_position[1])
+      or self.fault[0] >= self.fault[1])
 
-
-    # nikhil - another possible reward model to try: reward increases inversely proportional to gap between agent and goal
     # calculate reward
     reward = 0
-    self.distance_to_goal = np.linalg.norm(position - self.goal_position)
+    if (not done):
 
-    # if (self.fault[0] >= self.fault[1]):
-    #   # end game
-    if (self.distance_to_goal > self.prev_distance_to_goal):
-      reward = -1.0
-      self.fault[0] += 1
-    elif (self.distance_to_goal == self.prev_distance_to_goal):
-      reward = 0.0
-    else:
-      reward = 1.0
-
-    # nikhil - see if adding a final reward for reaching the goal affects performance
-    # nikhil - penalize each step taken?
-    #if done:
-        #reward = 1.0
-    #reward-= math.pow(action[0],2)*0.1
+      # future considerations
+      #  - penalize each step 
+      #  - give high final reward upon reaching goal
+      #  - increase reward inverse proportionally to gap between the agent and its goal
+    
+      self.distance_to_goal = np.linalg.norm(position - self.goal_position)
+      if (self.distance_to_goal > self.prev_distance_to_goal):
+        reward = -1.0
+        self.fault[0] += 1
+      elif (self.distance_to_goal == self.prev_distance_to_goal):
+        reward = 0.0
+      else:
+        reward = 1.0
+        self.fault[0] = 0
 
     self.state = position
     return self.state, reward, done, {}
@@ -125,9 +122,9 @@ class NavigateEnv(gym.Env):
       self.viewer.add_geom(bot)
       
       # GOOOOOOAAAAAAAALLLLLLL #TODO
-      flagx = self.goal_position[0]
-      flagy1 = self.goal_position[1] - 10
-      flagy2 = self.goal_position[1] + 10
+      flagx = self.goal_position[0] + 40
+      flagy1 = self.goal_position[1] - 20
+      flagy2 = self.goal_position[1] + 20
 
       flagpole = rendering.Line((flagx, flagy1), (flagx, flagy2))
       self.viewer.add_geom(flagpole)
