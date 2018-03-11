@@ -15,12 +15,12 @@ class NavigateEnv(gym.Env):
 
     # Bot dynamics
     self.min_position = np.array([0, 0])
-    self.max_position = np.array([1948, 1630])
+    self.max_position = np.array([1630, 1948])
     self.goal_position = np.array([0, 1066])
     self.start_position = np.array([1630, 1066])
     self.min_step = 0
     self.max_step = 2.0
-    self.frames_per_step = 8
+    self.frames_per_step = 4
     self.distance_to_goal = 0.0
     self.prev_distance_to_goal = 0.0
 
@@ -28,10 +28,10 @@ class NavigateEnv(gym.Env):
     self.fault = [0,5] # [current count, n]
 
     # Viewer
-    self.screen_width = 700
-    self.screen_height = 1000
-    self.world_width = self.max_position[0] - self.min_position[0]
-    self.scale = self.screen_width / self.world_width
+    self.screen_width = 500
+    self.screen_height = 700
+    self.world_width = 2000
+    #self.scale = self.screen_width / self.world_width
     self.grid_boxes = 100
     self.bot_width = 40
     self.bot_height = 20
@@ -48,6 +48,9 @@ class NavigateEnv(gym.Env):
     self.state = None
 
     self.reset()
+
+  def _convert_graphics_to_viewer_coords(graphics_coords):
+    return (graphics_coords[1], graphics_coords[0])
 
 
   def step(self, action):
@@ -73,7 +76,7 @@ class NavigateEnv(gym.Env):
     #   # end game
     if (self.distance_to_goal > self.prev_distance_to_goal):
       reward = -1.0
-      self.fault[0]++
+      self.fault[0] += 1
     elif (self.distance_to_goal == self.prev_distance_to_goal):
       reward = 0.0
     else:
@@ -94,45 +97,43 @@ class NavigateEnv(gym.Env):
     return np.array(self.state)
 
 
-  def _height(self, xs): #TODO
-    return np.sin(3 * xs)*.45+.55
-
-
   def render(self, mode='human'):
 
     if self.viewer is None:
       self.viewer = rendering.Viewer(self.screen_width, self.screen_height)
 
-      # list of evenly spaced x and y coordinates for the grid boxes
-      xs = np.linspace(self.min_position[0], self.max_position[1], self.grid_boxes)
-      ys = self._height(xs)
-      xys = list(zip((xs-self.min_position[0])*self.scale, ys*self.scale))
+      # # list of evenly spaced x and y coordinates for the grid boxes
+      # xs = np.linspace(self.min_position[0], self.max_position[1], self.grid_boxes)
+      # ys = self._height(xs)
+      # xys = list(zip((xs-self.min_position[0])*self.scale, ys*self.scale))
 
     
       # nikhil - may use later when creating a line that trails the bot to show the entire path taken
       # track = rendering.make_polyline(xys)
       # track.set_linewidth(4)
       # self.viewer.add_geom(track)
-      
-      clearance = 10
 
       # bot
-      l,r,t,b = -self.bot_width / 2, self.bot_width / 2, self.bot_height, 0
+      l = self.start_position[0] - self.bot_width / 2
+      r = self.start_position[0] + self.bot_width / 2
+      t = self.start_position[1] + self.bot_width / 2
+      b = self.start_position[1] - self.bot_width / 2
       bot = rendering.FilledPolygon([(l,b), (l,t), (r,t), (r,b)])
-      bot.add_attr(rendering.Transform(translation=(0, clearance)))
+      bot.add_attr(rendering.Transform())
       self.bot_trans = rendering.Transform()
       bot.add_attr(self.bot_trans)
       self.viewer.add_geom(bot)
       
       # GOOOOOOAAAAAAAALLLLLLL #TODO
-      flagx = np.linalg.norm(self.goal_position - self.min_position)*self.scale 
-      flagy1 = self._height(self.goal_position[1])*self.scale
-      flagy2 = flagy1 + 50
+      flagx = self.goal_position[0]
+      flagy1 = self.goal_position[1] - 10
+      flagy2 = self.goal_position[1] + 10
+
       flagpole = rendering.Line((flagx, flagy1), (flagx, flagy2))
       self.viewer.add_geom(flagpole)
-      flag = rendering.FilledPolygon([(flagx, flagy2), (flagx, flagy2-10), (flagx+25, flagy2-5)])
-      flag.set_color(.8,.8,0)
-      self.viewer.add_geom(flag)
+      #flag = rendering.FilledPolygon([(flagx, flagy2), (flagx, flagy2-10), (flagx+25, flagy2-5)])
+      #flag.set_color(.8,.8,0)
+      #self.viewer.add_geom(flag)
 
       pos = self.state[0]
 
