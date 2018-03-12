@@ -8,7 +8,7 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
 
-def export_plot(ys, ylabel, title, filename):
+def export_plot(ys, ylabel, filename):
     """
     Export a plot in filename
 
@@ -20,7 +20,6 @@ def export_plot(ys, ylabel, title, filename):
     plt.plot(range(len(ys)), ys)
     plt.xlabel("Training Episode")
     plt.ylabel(ylabel)
-    plt.title(title)
     plt.savefig(filename)
     plt.close()
 

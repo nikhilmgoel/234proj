@@ -5,6 +5,10 @@ import math
 import numpy as np
 from gym.envs.classic_control import rendering
 
+import sys
+sys.path.append('../../')
+import read_data
+
 class NavigateEnv(gym.Env):
   metadata = {
   	'render.modes': ['human', 'rgb_array'], 
@@ -15,9 +19,9 @@ class NavigateEnv(gym.Env):
 
     # Bot dynamics
     self.min_position = np.array([0, 0])
-    self.max_position = np.array([1948, 1630])
-    self.goal_position = np.array([0, 1066])
-    self.start_position = np.array([1630, 1066])
+    self.max_position = np.array([239, 200])
+    self.goal_position = np.array([131, 0])
+    self.start_position = np.array([131, 200])
     self.min_step = 0
     self.max_step = 2.0
     self.frames_per_step = 8
@@ -46,14 +50,27 @@ class NavigateEnv(gym.Env):
 
     self.viewer = None
     self.state = None
+    self.bot_position = None
 
-    self.reset()
+    self.episodes = []
+    for s in read_data.VALID_SCENES:
+      scene = read_data.load_processed_scene(s)
+      for e in range(5):
+        new_ep = []
+        for f in range(e * 1792, (e+1) * 1792):
+          new_ep.append(scene[f])
+        self.episodes.append(new_ep)
+
+    self.game_index = -1
+    self.tick = -1
 
 
   def step(self, action):
     assert self.action_space.contains(action), "%r (%s) invalid" % (action, type(action))
 
-    position = self.state
+    self.tick += 1
+
+    position = self.bot_position
     position = (position[0] + action[0], position[1] + action[1])
 
     if (position[0] > self.max_position[0]): position[0] = self.max_position[0]
@@ -62,22 +79,28 @@ class NavigateEnv(gym.Env):
     if (position[1] < self.min_position[1]): position[1] = self.min_position[1]
 
     done = bool(position[0] >= self.goal_position[0] and position[1] >= self.goal_position[1])
+    if self.tick > 1792:
+      done = True
 
+    self.bot_position = position
 
     # nikhil - another possible reward model to try: reward increases inversely proportional to gap between agent and goal
     # calculate reward
     reward = 0
     self.distance_to_goal = np.linalg.norm(position - self.goal_position)
 
-    # if (self.fault[0] >= self.fault[1]):
-    #   # end game
+    # check for closing on goal
     if (self.distance_to_goal > self.prev_distance_to_goal):
-      reward = -1.0
-      self.fault[0]++
+      reward += -1.0
+      self.fault[0]+=1
     elif (self.distance_to_goal == self.prev_distance_to_goal):
-      reward = 0.0
+      reward += 0.0
     else:
-      reward = 1.0
+      reward += 1.0
+
+    # check for collision
+    if self.state[position[0], position[1]] == 1:
+      reward += -100
 
     # nikhil - see if adding a final reward for reaching the goal affects performance
     # nikhil - penalize each step taken?
@@ -85,13 +108,38 @@ class NavigateEnv(gym.Env):
         #reward = 1.0
     #reward-= math.pow(action[0],2)*0.1
 
-    self.state = position
+    self.state = self.load_frame(self.game_index, self.tick)
+    self.state[position[0], position[1]] = 0
     return self.state, reward, done, {}
 
 
-  def reset(self):
-    self.state = self.start_position
+  def reset(self, index):
+    """ set our state as the empty circle of death state with our
+    actor starting at the start position (coming in from white plaza)
+
+    Args:
+      index (int): the index episode to pull
+    """
+    # load up a game
+    self.state = self.load_frame(index, 0)
+    self.game_index = index
+    self.tick = 0
+
+    # put the bot at the starting position
+    self.bot_position = self.start_position
+    self.state[self.bot_position[0], self.bot_position[1]] = 1.
+
     return np.array(self.state)
+
+
+  def load_frame(self, index, tick):
+    """ set our state as the empty circle of death state with our
+    actor starting at the start position (coming in from white plaza)
+
+    Args:
+      index (int): the index episode to pull
+    """
+    return self.episodes[index][tick]
 
 
   def _height(self, xs): #TODO
