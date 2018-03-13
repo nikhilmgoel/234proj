@@ -38,3 +38,7 @@ class MaxAndSkipEnv(gym.Wrapper):
         obs = self.env.reset(i)
         self._obs_buffer.append(obs)
         return obs
+
+    def reset(self, i):
+        """okie"""
+        return self._reset(i)
