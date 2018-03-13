@@ -308,7 +308,11 @@ class QN(object):
                 idx     = replay_buffer.store_frame(state)
                 q_input = replay_buffer.encode_recent_observation()
 
-                action = self.get_action(q_input)
+                try:
+                    action = self.get_action(q_input)
+                except:
+                    import IPython
+                    IPython.embed()
 
                 # perform action in env
                 new_state, reward, done, info = env.step(action)
