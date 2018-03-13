@@ -11,7 +11,7 @@ from collections import deque
 from utils.general import get_logger, Progbar, export_plot
 from utils.replay_buffer import ReplayBuffer
 from utils.preprocess import rescale
-from utils.wrappers import PreproWrapper, MaxAndSkipEnv
+from utils.wrappers import MaxAndSkipEnv
 
 
 class QN(object):
@@ -339,8 +339,6 @@ class QN(object):
         env = gym.make(self.config.env_name)
         env = gym.wrappers.Monitor(env, self.config.record_path, video_callable=lambda x: True, resume=True)
         env = MaxAndSkipEnv(env, skip=self.config.skip_frame)
-        env = PreproWrapper(env, prepro=rescale, shape=(239, 200, 1), 
-                        overwrite_render=self.config.overwrite_render)
         self.evaluate(env, 1)
 
 

@@ -16,6 +16,7 @@ class MaxAndSkipEnv(gym.Wrapper):
         # most recent raw observations (for max pooling across time steps)
         self._obs_buffer = deque(maxlen=2)
         self._skip       = skip
+        self.other_reset = env.reset
 
     def _step(self, action):
         total_reward = 0.0
@@ -31,70 +32,9 @@ class MaxAndSkipEnv(gym.Wrapper):
 
         return max_frame, total_reward, done, info
 
-    def _reset(self):
+    def _reset(self, i):
         """Clear past frame buffer and init. to first obs. from inner env."""
         self._obs_buffer.clear()
-        obs = self.env.reset()
+        obs = self.env.reset(i)
         self._obs_buffer.append(obs)
         return obs
-
-
-class PreproWrapper(gym.Wrapper):
-    """
-    Wrapper for Pong to apply preprocessing
-    Stores the state into variable self.obs
-    """
-    def __init__(self, env, prepro, shape, overwrite_render=True, high=255):
-        """
-        Args:
-            env: (gym env)
-            prepro: (function) to apply to a state for preprocessing
-            shape: (list) shape of obs after prepro
-            overwrite_render: (bool) if True, render is overwriten to vizualise effect of prepro
-            grey_scale: (bool) if True, assume grey scale, else black and white
-            high: (int) max value of state after prepro
-        """
-        super(PreproWrapper, self).__init__(env)
-        self.overwrite_render = overwrite_render
-        self.viewer = None
-        self.prepro = prepro
-        self.observation_space = spaces.Box(low=0, high=high, shape=shape)
-        self.high = high
-
-
-    def _step(self, action):
-        """
-        Overwrites _step function from environment to apply preprocess
-        """
-        obs, reward, done, info = self.env.step(action)
-        self.obs = self.prepro(obs)
-        return self.obs, reward, done, info
-
-
-    def _reset(self):
-        self.obs = self.prepro(self.env.reset())
-        return self.obs
-
-
-    def _render(self, mode='human', close=False):
-        """
-        Overwrite _render function to vizualize preprocessing
-        """
-
-        if self.overwrite_render:
-            if close:
-                if self.viewer is not None:
-                    self.viewer.close()
-                    self.viewer = None
-                return
-            img = self.obs
-            if mode == 'rgb_array':
-                return img
-            elif mode == 'human':
-                from gym.envs.classic_control import rendering
-                if self.viewer is None:
-                    self.viewer = SimpleImageViewer()
-                self.viewer.imshow(img)
-
-        else:
-            super(PongWrapper, self)._render(mode, close)

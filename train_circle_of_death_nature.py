@@ -1,7 +1,7 @@
 import gym
 import gym_navigate
 from utils.preprocess import rescale
-from utils.wrappers import PreproWrapper, MaxAndSkipEnv
+from utils.wrappers import MaxAndSkipEnv
 
 from schedule import LinearExploration, LinearSchedule
 from nature import NatureQN
@@ -28,8 +28,6 @@ if __name__ == '__main__':
     # make env
     env = gym.make(config.env_name)
     env = MaxAndSkipEnv(env, skip=config.skip_frame)
-#     env = PreproWrapper(env, prepro=rescale, shape=(240, 200, 1), 
-                        # overwrite_render=config.overwrite_render)
 
     # exploration strategy
     exp_schedule = LinearExploration(env, config.eps_begin, 
