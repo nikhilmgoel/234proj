@@ -339,7 +339,7 @@ class QN(object):
         env = gym.make(self.config.env_name)
         custom_reset = env.reset
         env = gym.wrappers.Monitor(env, self.config.record_path, video_callable=lambda x: True, resume=True)
-        env = MaxAndSkipEnv(env, skip=self.config.skip_frame, custom_reset)
+        env = MaxAndSkipEnv(custom_reset, env, skip=self.config.skip_frame)
         self.evaluate(env, 1)
 
 
