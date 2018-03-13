@@ -87,7 +87,7 @@ class NavigateEnv(gym.Env):
       add_y = 0
       add_x = -1
    
-    position = (position[0] + add_y, position[1] + add_x)
+    position = [position[0] + add_y, position[1] + add_x]
 
     if (position[0] > self.max_position[0]): position[0] = self.max_position[0]
     if (position[1] > self.max_position[1]): position[1] = self.max_position[1]
