@@ -187,7 +187,7 @@ class QN(object):
                 t += 1
                 last_eval += 1
                 last_record += 1
-                if self.config.render_train: self.env.render()
+                # if self.config.render_train: self.env.render()
                 # replay memory stuff
                 idx      = replay_buffer.store_frame(state)
                 q_input = replay_buffer.encode_recent_observation()
@@ -302,7 +302,7 @@ class QN(object):
             total_reward = 0
             state = env.reset(i)
             while True:
-                if self.config.render_test: env.render()
+                #if self.config.render_test: env.render()
 
                 # store last state in buffer
                 idx     = replay_buffer.store_frame(state)
