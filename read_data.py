@@ -7,7 +7,7 @@ import os
 import numpy as np
 import copy
 
-VALID_SCENES = [0,1,3]
+VALID_SCENES = [0]
 
 START_HEIGHT = 1948
 START_WIDTH = 1630

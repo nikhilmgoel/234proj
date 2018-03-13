@@ -15,12 +15,12 @@ class config():
     record_path  = output_path + "monitor/"
 
     # model and training config that need manual setting
-    num_scenes         = 3
+    num_scenes         = 1
     video_duration     = 9031
     episode_duration   = 967             # how long we want each test/train episode to last
-    num_episodes       = 28              # manually divide video_duration by episode_duration and multiply by num_videos
-    num_episodes_train = 20
-    num_episodes_test  = 8
+    num_episodes       = 9               # manually divide video_duration by episode_duration and multiply by num_videos
+    num_episodes_train = 7
+    num_episodes_test  = 2
 
     # other model and training config
     grad_clip         = True
