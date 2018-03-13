@@ -1,11 +1,15 @@
 import numpy as np
 
+import sys
+sys.path.append('../')
+import read_data
+
 def rescale(state):
     """
     Preprocess state (240, 201, 1) image into
     a (239, 200, 1) image in grey scale
     """
-    state = np.reshape(state, [240, 201, 1]).astype(np.float32)
+    state = np.reshape(state, [read_data.SCALED_HEIGHT, read_data.SCALED_WIDTH, 1]).astype(np.float32)
 
     state = state[:, :, np.newaxis]
 
