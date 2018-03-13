@@ -8,9 +8,9 @@ def rescale(state):
     """
     Preprocess state image
     """
-    state = np.reshape(state, [read_data.SCALED_HEIGHT, read_data.SCALED_WIDTH, 1]).astype(np.float32)
+    # state = np.reshape(state, [read_data.SCALED_HEIGHT, read_data.SCALED_WIDTH]).astype(np.float32)
 
-    state = state[:, :, np.newaxis]
+    # state = state[:, :, np.newaxis]
 
     return state.astype(np.uint8)
 
