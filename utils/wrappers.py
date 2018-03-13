@@ -42,3 +42,41 @@ class MaxAndSkipEnv(gym.Wrapper):
     def reset(self, i):
         """okie"""
         return self._reset(i)
+
+class PreproWrapper(gym.Wrapper):
+    """
+    Wrapper for Pong to apply preprocessing
+    Stores the state into variable self.obs
+    """
+    def __init__(self, env, prepro, shape, custom_reset, high=255):
+        """
+        Args:
+            env: (gym env)
+            prepro: (function) to apply to a state for preprocessing
+            shape: (list) shape of obs after prepro
+            grey_scale: (bool) if True, assume grey scale, else black and white
+            high: (int) max value of state after prepro
+        """
+        self.reset_custom = custom_reset
+        super(PreproWrapper, self).__init__(env)
+        self.prepro = prepro
+        self.observation_space = spaces.Box(low=0, high=high, shape=shape)
+        self.high = high
+
+
+    def _step(self, action):
+        """
+        Overwrites _step function from environment to apply preprocess
+        """
+        obs, reward, done, info = self.env.step(action)
+        self.obs = self.prepro(obs)
+        return self.obs, reward, done, info
+
+
+    def _reset(self, i):
+        self.obs = self.prepro(self.reset_custom())
+        return self.obs
+
+    def reset(self, i):
+        """okie"""
+        return self._reset(i)
