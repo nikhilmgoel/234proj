@@ -149,7 +149,7 @@ class NavigateEnv(gym.Env):
     # put the bot at the starting position
     self.bot_position = self.start_position
 
-    return np.array(self.state)
+    return self.state
 
 
   def load_frame(self, index, tick):
