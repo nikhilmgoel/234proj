@@ -43,6 +43,7 @@ class MaxAndSkipEnv(gym.Wrapper):
         """okie"""
         return self._reset(i)
 
+
 class PreproWrapper(gym.Wrapper):
     """
     Wrapper for Pong to apply preprocessing
@@ -62,7 +63,6 @@ class PreproWrapper(gym.Wrapper):
         self.prepro = prepro
         self.observation_space = spaces.Box(low=0, high=high, shape=shape)
         self.high = high
-
 
     def _step(self, action):
         """

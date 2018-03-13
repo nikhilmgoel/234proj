@@ -45,7 +45,7 @@ class NavigateEnv(gym.Env):
 
     # Spaces
     self.action_space = gym.spaces.Discrete(5)
-    self.observation_space = spaces.Box(low=0, high=1, shape=(240,201))
+    self.observation_space = spaces.Box(low=0, high=1, shape=(read_data.SCALED_HEIGHT,read_data.SCALED_WIDTH))
 
     self.viewer = None
     self.state = None

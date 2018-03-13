@@ -7,27 +7,24 @@ import os
 import numpy as np
 import copy
 
-VALID_SCENES = [0]
+VALID_SCENES = [0,1,3]
 
 START_HEIGHT = 1948
 START_WIDTH = 1630
-SCALED_HEIGHT = 240
-SCALED_WIDTH = 201
-
-CENTER_Y = 138
-CENTER_X = 102
+SCALED_HEIGHT = 98
+SCALED_WIDTH = 82
 
 # The following buildings are blocked off
 # Formatted as: [YMIN, YMAX, XMIN, XMAX]
-LANG_CORNER = [162, 240, 0, 74]
-CUBBERLY = [0, 72, 0, 72]
-CLOCK_TOWER = [77, 110, 117, 180]
-MECH = [176, 240, 148, 201]
-OTHER = [0, 100, 187, 201]
-OTHER_2 = [0, 19, 162, 201]
-BIKE_RACKS = [104, 123, 0, 76]
-WALL = [0, 50, 130, 134]
-CENTER = [133, 142, 96, 107]
+LANG_CORNER = [66, 98, 0, int(36/1.22448979)]
+CUBBERLY = [0, int(36/1.22448979), 0, int(36/1.22448979)]
+CLOCK_TOWER = [int(39/1.22448979), int(55/1.22448979), int(58./1.22448979), int(90./1.22448979)]
+MECH = [int(88/1.22448979), 98, int(75/1.22448979), 82]
+OTHER = [0, int(50/1.22448979), int(94/1.22448979), 82]
+OTHER_2 = [0, int(9/1.22448979), int(81/1.22448979), 82]
+BIKE_RACKS = [int(52/1.22448979), int(60/1.22448979), 0, int(37/1.22448979)]
+WALL = [0, int(25/1.22448979), int(65/1.22448979), int(67/1.22448979)]
+CENTER = [int(69/1.22448979), int(74/1.22448979), int(48/1.22448979), int(53/1.22448979)]
 
 def save_processed_scene(scene, s):
 	path = 'train_data/processed/scene' + str(s)
@@ -41,7 +38,7 @@ def load_processed_scene(s):
 def read_training_data():
 	""" Convert all data to a new set of frames
 	"""
-	start_scene = np.zeros((240, 201))
+	start_scene = np.zeros((98, 82))
 
 	for YMIN, YMAX, XMIN, XMAX in [LANG_CORNER, CUBBERLY, CLOCK_TOWER, MECH, OTHER, OTHER_2, BIKE_RACKS, WALL, CENTER]:
 		for y in range(YMIN, YMAX):
@@ -59,6 +56,7 @@ def read_training_data():
 		scene = {}
 
 		while True:
+		# for _ in range(200):
 			line = dataset.readline()
 			if line == '':
 				break
@@ -68,7 +66,7 @@ def read_training_data():
 			if frame not in scene:
 				scene[frame] = copy.deepcopy(start_scene)
 
-			divisor = 1948./240
+			divisor = float(START_HEIGHT)/SCALED_HEIGHT
 			x_min = int(int(row[1]) / divisor)
 			x_max = int(int(row[3]) / divisor)
 			y_min = int(int(row[2]) / divisor)
@@ -76,7 +74,7 @@ def read_training_data():
 
 			for y in range(y_min, y_max):
 				for x in range(x_min, x_max):
-					scene[frame][y][x] = 4.
+					scene[frame][y][x] = 1.
 
 		# from matplotlib import pyplot as plt
 		# plt.imshow(scene[frame], interpolation='nearest')
