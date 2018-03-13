@@ -73,8 +73,7 @@ class PreproWrapper(gym.Wrapper):
         return self.obs, reward, done, info
 
     def _reset(self, i):
-        self.env.reset()
-        self.obs = self.prepro(self.reset_custom(i))
+        self.obs = self.prepro(self.env.reset(i)) #self.reset_custom(i))
         return self.obs
 
     def reset(self, i):
