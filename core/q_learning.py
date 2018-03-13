@@ -182,7 +182,7 @@ class QN(object):
 
             # set the game to a new episode
             index = t % self.config.num_episodes_train
-            env.set_episode(self.train_episodes[index])
+            self.env.set_episode(self.train_episodes[index])
             state = self.env.reset()
             while True:
                 t += 1
