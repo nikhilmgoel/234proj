@@ -1,5 +1,5 @@
 import gym
-from utils.preprocess import greyscale
+from utils.preprocess import rescale
 from utils.wrappers import PreproWrapper, MaxAndSkipEnv
 
 from schedule import LinearExploration, LinearSchedule
