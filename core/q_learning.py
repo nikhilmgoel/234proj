@@ -13,6 +13,9 @@ from utils.replay_buffer import ReplayBuffer
 from utils.preprocess import rescale
 from utils.wrappers import MaxAndSkipEnv, PreproWrapper
 
+import sys
+sys.path.append('../')
+import read_data
 
 class QN(object):
     """
@@ -340,7 +343,7 @@ class QN(object):
         custom_reset = env.reset
         env = gym.wrappers.Monitor(env, self.config.record_path, video_callable=lambda x: True, resume=True)
         env = MaxAndSkipEnv(custom_reset, env, skip=self.config.skip_frame)
-        env = PreproWrapper(env, prepro=rescale, shape=(240, 201, 1), custom_reset=custom_reset)
+        env = PreproWrapper(env, prepro=rescale, shape=(read_data.SCALED_HEIGHT, read_data.SCALED_WIDTH, 1), custom_reset=custom_reset)
         self.evaluate(env, 1)
 
 
