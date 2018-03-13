@@ -1,11 +1,12 @@
 class config():
     # env config
-    render_train     = False
-    render_test      = True
-    env_name         = "gym-navigate"
-    overwrite_render = True
-    record           = True
-    high             = 255.
+    render_train      = False
+    render_test       = True
+    env_name          = "NavigateEnv-v0"
+    overwrite_render  = True
+    record            = True
+    randomize_dataset = True
+    high              = 255.
 
     # output config
     output_path  = "results/baseline_network/"

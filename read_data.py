@@ -36,7 +36,7 @@ def save_processed_scene(scene, s):
 	pickle.dump(scene, open(path + '/scene.pickle', 'wb'))
 
 def load_processed_scene(s):
-	return pickle.load(open('train_data/pooling/scene' + str(s) + '/scene.pickle', 'rb'))
+	return pickle.load(open('train_data/processed/scene' + str(s) + '/scene.pickle', 'rb'))
 
 def read_training_data():
 	""" Convert all data to a new set of frames
