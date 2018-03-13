@@ -38,12 +38,13 @@ class MaxAndSkipEnv(gym.Wrapper):
         self._obs_buffer.append(obs)
         return obs
 
+
 class PreproWrapper(gym.Wrapper):
     """
     Wrapper for Pong to apply preprocessing
     Stores the state into variable self.obs
     """
-    def __init__(self, env, prepro, shape, high=255):
+    def __init__(self, env, prepro, shape, custom_set_episode, high=255):
         """
         Args:
             env: (gym env)
@@ -56,6 +57,7 @@ class PreproWrapper(gym.Wrapper):
         self.prepro = prepro
         self.observation_space = spaces.Box(low=0, high=high, shape=shape)
         self.high = high
+        self.custom_set_episode = custom_set_episode
 
     def _step(self, action):
         """
@@ -68,3 +70,6 @@ class PreproWrapper(gym.Wrapper):
     def _reset(self):
         self.obs = self.prepro(self.env.reset())
         return self.obs
+
+    def set_episode(self, i):
+        self.custom_set_episode(i)
