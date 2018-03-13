@@ -133,17 +133,20 @@ class NavigateEnv(gym.Env):
 
     return self.state, reward, done, {}
 
-
-  def reset(self, index):
-    """ set our state as the empty circle of death state with our
-    actor starting at the start position (coming in from white plaza)
-
+  def set_episode(self, index):
+    """
     Args:
       index (int): the index episode to pull
     """
-    # load up a game
-    self.state = self.load_frame(index, 0)
     self.game_index = index
+
+
+  def reset(self):
+    """ set our state as the empty circle of death state with our
+    actor starting at the start position (coming in from white plaza)
+    """
+    # load up a game
+    self.state = self.load_frame(self.game_index, 0)
     self.tick = 0
 
     # put the bot at the starting position

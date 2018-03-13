@@ -182,7 +182,8 @@ class QN(object):
 
             # set the game to a new episode
             index = t % self.config.num_episodes_train
-            state = self.env.reset(index)
+            env.set_episode(self.train_episodes[index])
+            state = self.env.reset()
             while True:
                 t += 1
                 last_eval += 1
@@ -300,7 +301,8 @@ class QN(object):
 
         for i in self.test_episodes:
             total_reward = 0
-            state = env.reset(i)
+            env.set_episode(i)
+            state = env.reset()
             while True:
                 #if self.config.render_test: env.render()
 
@@ -344,10 +346,9 @@ class QN(object):
         Re create an env and record a video for one episode
         """
         env = gym.make(self.config.env_name)
-        custom_reset = env.reset
         env = gym.wrappers.Monitor(env, self.config.record_path, video_callable=lambda x: True, resume=True)
-        env = MaxAndSkipEnv(custom_reset, env, skip=self.config.skip_frame)
-        env = PreproWrapper(env, prepro=rescale, shape=(read_data.SCALED_HEIGHT, read_data.SCALED_WIDTH, 1), custom_reset=custom_reset)
+        env = MaxAndSkipEnv(env, skip=self.config.skip_frame)
+        env = PreproWrapper(env, prepro=rescale, shape=(read_data.SCALED_HEIGHT, read_data.SCALED_WIDTH, 1))
         self.evaluate(env, 1)
 
 

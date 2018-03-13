@@ -10,9 +10,8 @@ class MaxAndSkipEnv(gym.Wrapper):
     Wrapper from Berkeley's Assignment
     Takes a max pool over the last n states
     """
-    def __init__(self, custom_reset, env=None, skip=4):
+    def __init__(self, env=None, skip=4):
         """Return only every `skip`-th frame"""
-        self.reset_custom = custom_reset
         super(MaxAndSkipEnv, self).__init__(env)
         # most recent raw observations (for max pooling across time steps)
         self._obs_buffer = deque(maxlen=2)
@@ -32,24 +31,19 @@ class MaxAndSkipEnv(gym.Wrapper):
 
         return max_frame, total_reward, done, info
 
-    def _reset(self, i):
+    def _reset(self):
         """Clear past frame buffer and init. to first obs. from inner env."""
         self._obs_buffer.clear()
-        obs = self.reset_custom(i)
+        obs = self.env.reset()
         self._obs_buffer.append(obs)
         return obs
-
-    def reset(self, i):
-        """okie"""
-        return self._reset(i)
-
 
 class PreproWrapper(gym.Wrapper):
     """
     Wrapper for Pong to apply preprocessing
     Stores the state into variable self.obs
     """
-    def __init__(self, env, prepro, shape, custom_reset, high=255):
+    def __init__(self, env, prepro, shape, high=255):
         """
         Args:
             env: (gym env)
@@ -58,7 +52,6 @@ class PreproWrapper(gym.Wrapper):
             grey_scale: (bool) if True, assume grey scale, else black and white
             high: (int) max value of state after prepro
         """
-        self.reset_custom = custom_reset
         super(PreproWrapper, self).__init__(env)
         self.prepro = prepro
         self.observation_space = spaces.Box(low=0, high=high, shape=shape)
@@ -72,10 +65,6 @@ class PreproWrapper(gym.Wrapper):
         self.obs = self.prepro(obs)
         return self.obs, reward, done, info
 
-    def _reset(self, i):
-        self.obs = self.prepro(self.env.reset(i)) #self.reset_custom(i))
+    def _reset(self):
+        self.obs = self.prepro(self.env.reset())
         return self.obs
-
-    def reset(self, i):
-        """okie"""
-        return self._reset(i)
