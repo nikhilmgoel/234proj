@@ -23,7 +23,7 @@ class Linear(DQN):
         """
         # this information might be useful
         # here, typically, a state shape is (80, 80, 1)
-        state_shape = list(self.env.observation_space.shape)
+        # state_shape = list(self.env.observation_space.shape)
 
         ##############################################################
         """
@@ -56,8 +56,8 @@ class Linear(DQN):
         ################YOUR CODE HERE (6-15 lines) ##################
 
         self.batch_size = self.config.batch_size
-        self.img_height = state_shape[0]
-        self.img_width = state_shape[1]
+        self.img_height = 240
+        self.img_width = 201
         self.nchannels = 1
         self.state_history = self.config.state_history
 

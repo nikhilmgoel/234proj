@@ -48,8 +48,8 @@ class NavigateEnv(gym.Env):
   		low=np.array([-self.max_step, -self.max_step]), 
   		high=np.array([self.max_step, self.max_step]))
     self.observation_space = spaces.Box(
-    	low=np.array([self.min_position[0], self.min_position[1]]),
-    	high=np.array([self.max_position[0], self.max_position[1]]))
+      low=np.array([self.min_position[0], self.min_position[1]]),
+      high=np.array([self.max_position[0], self.max_position[1]]))
 
     self.viewer = None
     self.state = None
