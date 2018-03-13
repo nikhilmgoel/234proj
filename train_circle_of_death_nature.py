@@ -27,7 +27,7 @@ address-ip-of-the-server:6006
 if __name__ == '__main__':
     # make env
     env = gym.make(config.env_name)
-    env = MaxAndSkipEnv(env, skip=config.skip_frame)
+    env = MaxAndSkipEnv(env, skip=config.skip_frame, env.reset)
 
     # exploration strategy
     exp_schedule = LinearExploration(env, config.eps_begin, 

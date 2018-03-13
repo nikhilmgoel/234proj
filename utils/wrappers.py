@@ -10,9 +10,9 @@ class MaxAndSkipEnv(gym.Wrapper):
     Wrapper from Berkeley's Assignment
     Takes a max pool over the last n states
     """
-    def __init__(self, env=None, skip=4):
+    def __init__(self, env=None, skip=4, custom_reset):
         """Return only every `skip`-th frame"""
-        self.reset_custom = env.reset
+        self.reset_custom = custom_reset
         super(MaxAndSkipEnv, self).__init__(env)
         # most recent raw observations (for max pooling across time steps)
         self._obs_buffer = deque(maxlen=2)
