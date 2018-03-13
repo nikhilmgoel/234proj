@@ -44,12 +44,8 @@ class NavigateEnv(gym.Env):
     self.bot_height = 30
 
     # Spaces
-    self.action_space = spaces.Box(
-  		low=np.array([-self.max_step, -self.max_step]), 
-  		high=np.array([self.max_step, self.max_step]))
-    self.observation_space = spaces.Box(
-      low=np.array([self.min_position[0], self.min_position[1]]),
-      high=np.array([self.max_position[0], self.max_position[1]]))
+    self.action_space = gym.spaces.Discrete(5)
+    self.observation_space = spaces.Box(low=0, high=1, shape=(240,201))
 
     self.viewer = None
     self.state = None
@@ -75,7 +71,23 @@ class NavigateEnv(gym.Env):
     self.state = self.load_frame(self.game_index, self.tick)
 
     position = self.bot_position
-    position = (position[0] + action[0], position[1] + action[1])
+    if action == 0:
+      add_y = 0
+      add_x = 0
+    if action == 1:
+      add_y = 1
+      add_x = 0
+    if action == 2:
+      add_y = -1
+      add_x = 0
+    if action == 3:
+      add_y = 0
+      add_x = 1
+    if action == 4:
+      add_y = 0
+      add_x = -1
+   
+    position = (position[0] + add_y, position[1] + add_x)
 
     if (position[0] > self.max_position[0]): position[0] = self.max_position[0]
     if (position[1] > self.max_position[1]): position[1] = self.max_position[1]
