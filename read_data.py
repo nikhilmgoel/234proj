@@ -5,8 +5,29 @@ import pickle
 import sys
 import os
 import numpy as np
+import copy
 
 VALID_SCENES = [0,1,3]
+
+START_HEIGHT = 1948
+START_WIDTH = 1630
+SCALED_HEIGHT = 240
+SCALED_WIDTH = 201
+
+CENTER_Y = 138
+CENTER_X = 102
+
+# The following buildings are blocked off
+# Formatted as: [YMIN, YMAX, XMIN, XMAX]
+LANG_CORNER = [162, 240, 0, 74]
+CUBBERLY = [0, 72, 0, 72]
+CLOCK_TOWER = [77, 110, 117, 180]
+MECH = [176, 240, 148, 201]
+OTHER = [0, 100, 187, 201]
+OTHER_2 = [0, 19, 162, 201]
+BIKE_RACKS = [104, 123, 0, 76]
+WALL = [0, 50, 130, 134]
+CENTER = [133, 142, 96, 107]
 
 def save_processed_scene(scene, s):
 	path = 'train_data/processed/scene' + str(s)
@@ -18,8 +39,19 @@ def load_processed_scene(s):
 	return pickle.load(open('train_data/pooling/scene' + str(s) + '/scene.pickle', 'rb'))
 
 def read_training_data():
+	""" Convert all data to a new set of frames
 	"""
-	"""
+	start_scene = np.zeros((240, 201))
+
+	for YMIN, YMAX, XMIN, XMAX in [LANG_CORNER, CUBBERLY, CLOCK_TOWER, MECH, OTHER, OTHER_2, BIKE_RACKS, WALL, CENTER]:
+		for y in range(YMIN, YMAX):
+			for x in range(XMIN, XMAX):
+				start_scene[y][x] = 1.
+
+	# from matplotlib import pyplot as plt
+	# plt.imshow(start_scene, interpolation='nearest')
+	# plt.show()
+
 	for s in VALID_SCENES:
 		#load annotations
 		dataset = open('annotations/deathCircle/video' + str(s) + '/annotations.txt')
@@ -34,57 +66,24 @@ def read_training_data():
 			frame = int(row[5])
 
 			if frame not in scene:
-				scene[frame] = np.zeros((240, 201))
+				scene[frame] = copy.deepcopy(start_scene)
 
-			x_min = int(row[1])
-			x_max = int(row[3])
-			y_min = int(row[2])
-			y_max = int(row[4])
+			divisor = 1948./240
+			x_min = int(int(row[1]) / divisor)
+			x_max = int(int(row[3]) / divisor)
+			y_min = int(int(row[2]) / divisor)
+			y_max = int(int(row[4]) / divisor)
 
-			x = int((x_min + x_max) / 2. / 8.15)
-			y = int((y_min + y_max) / 2. / 8.15)
+			for y in range(y_min, y_max):
+				for x in range(x_min, x_max):
+					scene[frame][y][x] = 4.
 
-			scene[frame][y][x] = 1.
+		# from matplotlib import pyplot as plt
+		# plt.imshow(scene[frame], interpolation='nearest')
+		# plt.show()
 
 		save_processed_scene(scene, s)
 
-			# x = (x_min + x_max) / 2
-			# y = (y_min + y_max) / 2
-			# label = row[-1][1:-2]
-			# #skip sparse busses and resolve cars as carts
-			# if label == "Bus":
-			# 	continue
-			# if label == "Car":
-			# 	label = "Cart"
-			# member_id = int(row[0])
-			# info = [member_id, (x,y), label]
-			# if frame in scene:
-			# 	scene[frame].append(info)
-			# else:
-			# 	scene[frame] = [info]
 
-		# separate parsed info into the three dictionaries (reduces complexity while training)
-		# outlay_dict: position per frame. 
-		# class_dict: classification per member-id.
-		# path_dict: path thus far per member-id
-		# outlay_dict, class_dict, path_dict = {}, {}, {}
-		# frames = scene.keys()
-		# frames = sorted(frames)
-		# for frame in frames:
-		# 	outlay_dict[frame], path_dict[frame] = {}, {}
-		# 	for obj in scene[frame]:
-		# 		outlay_dict[frame][obj[0]] = obj[1] # in a frame, set {member-id: positions} of all objects
-		# 		class_dict[obj[0]] = obj[2] # frame doesn't matter. set {member-id: classification} for all objects in the scene
-
-		# 		# initial frame
-		# 		if frame == 0:
-		# 			path_dict[frame][obj[0]] = [obj[1]] # set {member-id: position} for all objects in the first frame
-		# 			continue
-
-		# 		prev_frame = frames[frames.index(frame) - 1]
-		# 		if obj[0] not in path_dict[prev_frame]:
-		# 			path_dict[frame][obj[0]] = [obj[1]]
-		# 		else:
-		# 			path_dict[frame][obj[0]] = path_dict[prev_frame][obj[0]] + [obj[1]]
-
-		# save_processed_scene([outlay_dict, class_dict, path_dict], s)
+if __name__=="__main__":
+	read_training_data()

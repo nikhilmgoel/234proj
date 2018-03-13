@@ -3,11 +3,11 @@ import tensorflow.contrib.layers as layers
 
 from utils.general import get_logger
 from utils.test_env import EnvTest
-from q1_schedule import LinearExploration, LinearSchedule
-from q2_linear import Linear
+from schedule import LinearExploration, LinearSchedule
+from linear import Linear
 
 
-from configs.q3_nature import config
+from configs.baseline_network import config
 
 
 class NatureQN(Linear):
@@ -29,32 +29,8 @@ class NatureQN(Linear):
         Returns:
             out: (tf tensor) of shape = (batch_size, num_actions)
         """
-        # this information might be useful
         num_actions = self.env.action_space.n
         out = state
-        ##############################################################
-        """
-        TODO: implement the computation of Q values like in the paper
-                https://storage.googleapis.com/deepmind-data/assets/papers/DeepMindNature14236Paper.pdf
-                https://www.cs.toronto.edu/~vmnih/docs/dqn.pdf
-
-              you may find the section "model architecture" of the appendix of the 
-              nature paper particulary useful.
-
-              store your result in out of shape = (batch_size, num_actions)
-
-        HINT: you may find tensorflow.contrib.layers useful (imported)
-              make sure to understand the use of the scope param
-              make sure to flatten() the tensor before connecting it to fully connected layers 
-
-              you can use any other methods from tensorflow
-              you are not allowed to import extra packages (like keras,
-              lasagne, cafe, etc.)
-
-        """
-        ##############################################################
-        ################ YOUR CODE HERE - 10-15 lines ################ 
-
         with tf.variable_scope(scope, reuse=reuse):
             first_layer = layers.conv2d(state, num_outputs = 32, kernel_size = 8, stride=4, biases_initializer=layers.xavier_initializer())
             second_layer = layers.conv2d(first_layer, num_outputs = 64, kernel_size = 4, stride=2, biases_initializer=layers.xavier_initializer())
@@ -63,8 +39,6 @@ class NatureQN(Linear):
             last = layers.fully_connected(flattened, num_outputs = 512, biases_initializer=layers.xavier_initializer())
             out = layers.fully_connected(last, num_outputs = num_actions, biases_initializer=layers.xavier_initializer(), activation_fn=None)
 
-        ##############################################################
-        ######################## END YOUR CODE #######################
         return out
 
 

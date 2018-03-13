@@ -2,10 +2,10 @@ import numpy as np
 
 def rescale(state):
     """
-    Preprocess state (1948, 1630, 1) image into
+    Preprocess state (240, 201, 1) image into
     a (239, 200, 1) image in grey scale
     """
-    state = np.reshape(state, [239, 200, 1]).astype(np.float32)
+    state = np.reshape(state, [240, 201, 1]).astype(np.float32)
 
     state = state[:, :, np.newaxis]
 

@@ -2,10 +2,10 @@ import gym
 from utils.preprocess import greyscale
 from utils.wrappers import PreproWrapper, MaxAndSkipEnv
 
-from q1_schedule import LinearExploration, LinearSchedule
-from q3_nature import NatureQN
+from schedule import LinearExploration, LinearSchedule
+from nature import NatureQN
 
-from configs.q5_train_atari_nature import config
+from configs.baseline_network import config
 
 """
 Use deep Q network for the Atari game. Please report the final result.
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     # make env
     env = gym.make(config.env_name)
     env = MaxAndSkipEnv(env, skip=config.skip_frame)
-    env = PreproWrapper(env, prepro=greyscale, shape=(80, 80, 1), 
+    env = PreproWrapper(env, prepro=greyscale, shape=(240, 200, 1), 
                         overwrite_render=config.overwrite_render)
 
     # exploration strategy

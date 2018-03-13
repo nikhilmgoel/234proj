@@ -17,10 +17,10 @@ class config():
     # model and training config that need manual setting
     num_scenes         = 3
     video_duration     = 9031
-    episode_duration   = 1792            # how long we want each test/train episode to last
-    num_episodes       = 15              # manually divide video_duration by episode_duration and multiply by num_videos
-    num_episodes_train = 10
-    num_episodes_test  = 5
+    episode_duration   = 967             # how long we want each test/train episode to last
+    num_episodes       = 28              # manually divide video_duration by episode_duration and multiply by num_videos
+    num_episodes_train = 20
+    num_episodes_test  = 8
 
     # other model and training config
     grad_clip         = True
@@ -37,9 +37,9 @@ class config():
     buffer_size        = 1000000
     target_update_freq = 10000
     gamma              = 0.99
-    learning_freq      = 4
-    state_history      = 4
-    skip_frame         = 4
+    learning_freq      = 8
+    state_history      = 8
+    skip_frame         = 8
     lr_begin           = 0.00025
     lr_end             = 0.00005
     lr_nsteps          = nsteps_train/2
