@@ -12,11 +12,11 @@ class MaxAndSkipEnv(gym.Wrapper):
     """
     def __init__(self, env=None, skip=4):
         """Return only every `skip`-th frame"""
+        self.reset_custom = env.reset
         super(MaxAndSkipEnv, self).__init__(env)
         # most recent raw observations (for max pooling across time steps)
         self._obs_buffer = deque(maxlen=2)
         self._skip       = skip
-        self.other_reset = env.reset
 
     def _step(self, action):
         total_reward = 0.0
@@ -35,7 +35,7 @@ class MaxAndSkipEnv(gym.Wrapper):
     def _reset(self, i):
         """Clear past frame buffer and init. to first obs. from inner env."""
         self._obs_buffer.clear()
-        obs = self.env.reset(i)
+        obs = self.reset_custom(i)
         self._obs_buffer.append(obs)
         return obs
 
