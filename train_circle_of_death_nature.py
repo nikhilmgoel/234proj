@@ -1,7 +1,7 @@
 import gym
 import gym_navigate
 from utils.preprocess import rescale
-from utils.wrappers import MaxAndSkipEnv
+from utils.wrappers import MaxAndSkipEnv, PreproWrapper
 
 from schedule import LinearExploration, LinearSchedule
 from nature import NatureQN

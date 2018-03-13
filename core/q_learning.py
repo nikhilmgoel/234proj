@@ -11,7 +11,7 @@ from collections import deque
 from utils.general import get_logger, Progbar, export_plot
 from utils.replay_buffer import ReplayBuffer
 from utils.preprocess import rescale
-from utils.wrappers import MaxAndSkipEnv
+from utils.wrappers import MaxAndSkipEnv, PreproWrapper
 
 
 class QN(object):
