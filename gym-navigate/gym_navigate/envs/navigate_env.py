@@ -113,7 +113,7 @@ class NavigateEnv(gym.Env):
     elif (self.distance_to_goal == self.prev_distance_to_goal):
       reward += 0.0
     else:
-      reward += 1.0
+      reward += 1.0 + 1.0/self.distance_to_goal
 
     # check for collision in the bot's area
     for y in range(position[0] - (self.bot_size/2) , position[0] + (self.bot_size/2) + 1):
