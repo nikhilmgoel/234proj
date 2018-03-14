@@ -104,7 +104,7 @@ class NavigateEnv(gym.Env):
 
      # check for hitting goal
     if at_goal:
-      reward += 1000
+      reward += 100
 
     # check for closing on goal
     if (self.distance_to_goal > self.prev_distance_to_goal):
