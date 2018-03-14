@@ -195,7 +195,8 @@ class QN(object):
 
                 # chose action according to current Q and exploration
                 best_action, q_values = self.get_best_action(q_input)
-                action                = exp_schedule.get_action(best_action)
+                # action                = exp_schedule.get_action(best_action)
+                action = 4
 
                 # store q values
                 max_q_values.append(max(q_values))
@@ -310,11 +311,12 @@ class QN(object):
                 idx     = replay_buffer.store_frame(state)
                 q_input = replay_buffer.encode_recent_observation()
 
-                try:
-                    action = self.get_action(q_input)
-                except:
-                    import IPython
-                    IPython.embed()
+                # try:
+                #     action = self.get_action(q_input)
+                # except:
+                #     import IPython
+                #     IPython.embed()
+                action = 4
 
                 # perform action in env
                 new_state, reward, done, info = env.step(action)
